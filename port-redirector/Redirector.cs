@@ -128,10 +128,20 @@ namespace port_redirector
 			}
 		}
 
+		private static void Info(string format, params object[] args)
+		{
+			if (args != null && args.Length > 0) format = string.Format(format, args);
+			var message = string.Format("info - {0}", format);
+			Debug.WriteLine(message);
+			if (Environment.UserInteractive) Console.WriteLine(message);
+		}
+
 		private static void Error(Exception exc, string format, params object[] args)
 		{
 			if (args != null && args.Length > 0) format = string.Format(format, args);
-			Debug.WriteLine(string.Format("{0} exception: {1}", format, exc));
+			var message = string.Format("error - {0} exception: {1}", format, exc);
+			Debug.WriteLine(message);
+			if (Environment.UserInteractive) Console.WriteLine(message);
 		}
 
 		private static string GetConfigFileName()
@@ -171,13 +181,18 @@ namespace port_redirector
 			{
 				listener = (Socket) ar.AsyncState;
 				var thread = new Thread(ForwardingProcedure);
-				thread.Start(listener.EndAccept(ar));
-				NextFlag.Set();
+				var socket = listener.EndAccept(ar);
+				Info("new connection from {0}", socket.RemoteEndPoint);
+				thread.Start(socket);
 			}
 			catch (Exception e)
 			{
-				if (listener!=null) listener.Close();
+				if (listener != null) listener.Close();
 				Error(e, "on incoming connection");
+			}
+			finally
+			{
+				NextFlag.Set();
 			}
 		}
 
