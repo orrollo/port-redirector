@@ -25,13 +25,22 @@ namespace port_redirector
 				foreach (var arg in args)
 				{
 					var upper = arg.ToUpper();
-					if (upper == "-I" || upper == "/I") Install();
-					if (upper == "-U" || upper == "/U") Uninstall();
+					if (upper == "-I" || upper == "/I")
+					{
+						Install(); 
+						return;
+					}
+					if (upper == "-U" || upper == "/U")
+					{
+						Uninstall();
+						return;
+					}
 				}
 				Redirector.CommandLine = args;
 			}
 			if (System.Environment.UserInteractive)
 			{
+				Console.WriteLine("press enter to stop...");
 				Console.CancelKeyPress += Console_CancelKeyPress;
 				Redirector.Start();
 				Console.ReadLine();
